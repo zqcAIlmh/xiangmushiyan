@@ -62,31 +62,18 @@ const startServer = async () => {
     console.log('Parent directory:', path.resolve(__dirname, '..'));
     console.log('Current working directory:', process.cwd());
 
-    // 尝试不同的路径组合
-    const possiblePaths = [
-      path.join(__dirname, '../html'),
-      path.join(process.cwd(), '../html'),
-      path.join(process.cwd(), 'html'),
-      '/app/html'
-    ];
-
-    console.log('Possible paths:');
-    possiblePaths.forEach((p, i) => {
-      console.log(`${i+1}: ${p}`);
-    });
-
-    // 尝试使用相对路径
-    app.use(express.static('../html'));
-    app.use('/css', express.static('../css'));
-    app.use('/js', express.static('../js'));
-    app.use('/images', express.static('../images'));
-    app.use('/fonts', express.static('../fonts'));
+    // 静态文件服务 - 使用正确的绝对路径
+    app.use(express.static('/app/html'));
+    app.use('/css', express.static('/app/css'));
+    app.use('/js', express.static('/app/js'));
+    app.use('/images', express.static('/app/images'));
+    app.use('/fonts', express.static('/app/fonts'));
 
     // 默认路由
     app.get('/', (req, res) => {
       console.log('Request received for /');
       try {
-        res.sendFile('../html/index.html', { root: __dirname });
+        res.sendFile('/app/html/index.html');
       } catch (error) {
         console.error('Error sending file:', error);
         res.status(500).send('Internal Server Error');
