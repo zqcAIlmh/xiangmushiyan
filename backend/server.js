@@ -57,20 +57,40 @@ const startServer = async () => {
     app.use('/api/reviews', require('./routes/reviews'));
     app.use('/api/auth', require('./routes/auth'));
 
-    // 获取项目根目录的绝对路径
-    const projectRoot = path.resolve(__dirname, '..');
-    console.log('Project root:', projectRoot);
-    
-    // 静态文件服务
-    app.use(express.static(path.join(projectRoot, 'html')));
-    app.use('/css', express.static(path.join(projectRoot, 'css')));
-    app.use('/js', express.static(path.join(projectRoot, 'js')));
-    app.use('/images', express.static(path.join(projectRoot, 'images')));
-    app.use('/fonts', express.static(path.join(projectRoot, 'fonts')));
+    // 详细路径调试
+    console.log('Current directory:', __dirname);
+    console.log('Parent directory:', path.resolve(__dirname, '..'));
+    console.log('Current working directory:', process.cwd());
 
-    // 默认路由，重定向到index.html
+    // 尝试不同的路径组合
+    const possiblePaths = [
+      path.join(__dirname, '../html'),
+      path.join(process.cwd(), '../html'),
+      path.join(process.cwd(), 'html'),
+      '/app/html'
+    ];
+
+    console.log('Possible paths:');
+    possiblePaths.forEach((p, i) => {
+      console.log(`${i+1}: ${p}`);
+    });
+
+    // 尝试使用相对路径
+    app.use(express.static('../html'));
+    app.use('/css', express.static('../css'));
+    app.use('/js', express.static('../js'));
+    app.use('/images', express.static('../images'));
+    app.use('/fonts', express.static('../fonts'));
+
+    // 默认路由
     app.get('/', (req, res) => {
-      res.sendFile(path.join(projectRoot, 'html', 'index.html'));
+      console.log('Request received for /');
+      try {
+        res.sendFile('../html/index.html', { root: __dirname });
+      } catch (error) {
+        console.error('Error sending file:', error);
+        res.status(500).send('Internal Server Error');
+      }
     });
 
     const PORT = process.env.PORT || 5000;
