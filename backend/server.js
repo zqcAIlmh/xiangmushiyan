@@ -68,75 +68,34 @@ const startServer = async () => {
     // 检查当前目录结构
     console.log('Checking current directory structure:');
     try {
-      const files = fs.readdirSync('/app');
-      console.log('Files in /app:', files);
+      const files = fs.readdirSync(__dirname);
+      console.log('Files in current directory:', files);
+      
+      // 检查是否有html目录
+      if (fs.existsSync(path.join(__dirname, 'html'))) {
+        const htmlFiles = fs.readdirSync(path.join(__dirname, 'html'));
+        console.log('Files in html directory:', htmlFiles);
+      } else {
+        console.log('html directory does not exist');
+      }
     } catch (error) {
       console.error('Error reading directory:', error);
     }
 
-    // 默认路由 - 直接返回一个简单的HTML页面
+    // 静态文件服务 - 使用相对路径
+    app.use(express.static('html'));
+    app.use('/css', express.static('css'));
+    app.use('/js', express.static('js'));
+    app.use('/images', express.static('images'));
+    app.use('/fonts', express.static('fonts'));
+
+    // 默认路由
     app.get('/', (req, res) => {
       console.log('Request received for /');
       try {
-        // 直接返回一个简单的HTML页面
-        res.send(`
-          <!DOCTYPE html>
-          <html lang="zh-CN">
-          <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>游戏测评网站</title>
-            <style>
-              body {
-                font-family: Arial, sans-serif;
-                background-color: #f5f5f5;
-                margin: 0;
-                padding: 20px;
-              }
-              .container {
-                max-width: 800px;
-                margin: 0 auto;
-                background-color: white;
-                padding: 40px;
-                border-radius: 8px;
-                box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-              }
-              h1 {
-                color: #4CAF50;
-              }
-              p {
-                line-height: 1.6;
-              }
-              .btn {
-                display: inline-block;
-                padding: 10px 20px;
-                background-color: #4CAF50;
-                color: white;
-                text-decoration: none;
-                border-radius: 4px;
-                margin-top: 20px;
-              }
-            </style>
-          </head>
-          <body>
-            <div class="container">
-              <h1>游戏测评网站</h1>
-              <p>欢迎访问游戏测评网站！</p>
-              <p>这是一个基于Node.js、Express和MongoDB的游戏测评网站，支持用户注册登录、游戏管理、评论管理等功能。</p>
-              <p>API接口：</p>
-              <ul>
-                <li><a href="/api/games">/api/games</a> - 游戏列表</li>
-                <li><a href="/api/reviews">/api/reviews</a> - 评论列表</li>
-                <li><a href="/api/auth/login">/api/auth/login</a> - 登录接口</li>
-                <li><a href="/api/auth/register">/api/auth/register</a> - 注册接口</li>
-              </ul>
-              <a href="/api/games" class="btn">查看游戏列表</a>
-            </div>
-          </body>
-          </html>
-        `);
+        res.sendFile('index.html', { root: 'html' });
       } catch (error) {
-        console.error('Error sending response:', error);
+        console.error('Error sending file:', error);
         res.status(500).send('Internal Server Error');
       }
     });

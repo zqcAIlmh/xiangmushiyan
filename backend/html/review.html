@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>游戏测评网 - 撰写评测</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+    <header>
+        <div class="container nav-container">
+            <a href="index.html" class="logo">GameReview</a>
+            <nav>
+                <ul>
+                    <li><a href="index.html">首页</a></li>
+                    <li><a href="games.html">游戏库</a></li>
+                    <li><a href="ranking.html">排行榜</a></li>
+                    <li id="admin-link" style="display: none;"><a href="admin.html">管理</a></li>
+                </ul>
+            </nav>
+            <div class="auth-buttons" id="auth-buttons">
+                <a href="login.html" class="btn btn-secondary">登录</a>
+                <a href="register.html" class="btn btn-primary">注册</a>
+            </div>
+            <div class="user-info" id="user-info" style="display: none;">
+                <span id="username"></span>
+                <button id="logout-btn" class="btn btn-secondary">退出</button>
+            </div>
+        </div>
+    </header>
+    
+    <script>
+        // 检查用户登录状态
+        function checkLoginStatus() {
+            const user = localStorage.getItem('user');
+            const token = localStorage.getItem('token');
+            
+            if (user && token) {
+                const userObj = JSON.parse(user);
+                document.getElementById('username').textContent = userObj.username;
+                document.getElementById('auth-buttons').style.display = 'none';
+                document.getElementById('user-info').style.display = 'flex';
+                
+                // 如果是管理员，显示管理链接
+                if (userObj.role === 'admin') {
+                    document.getElementById('admin-link').style.display = 'block';
+                }
+            }
+        }
+        
+        // 退出登录
+        document.getElementById('logout-btn')?.addEventListener('click', function() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = 'index.html';
+        });
+        
+        // 页面加载时检查登录状态
+        checkLoginStatus();
+    </script>
+
+    <!-- 评测发布表单 -->
+    <div class="container">
+        <div class="content-section">
+            <h2 class="section-title">撰写评测</h2>
+            <div class="review-form">
+                <form id="reviewForm">
+                    <div class="form-group">
+                        <label for="game">选择游戏</label>
+                        <select id="game" name="game" required>
+                            <option value="">请选择游戏</option>
+                            <!-- 动态加载游戏列表 -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="rating">评分</label>
+                        <div class="rating-input">
+                            <div class="rating-stars">
+                                <span class="star">★</span>
+                                <span class="star">★</span>
+                                <span class="star">★</span>
+                                <span class="star">★</span>
+                                <span class="star">★</span>
+                            </div>
+                            <span id="rating-value">0/5</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="title">评测标题</label>
+                        <input type="text" id="title" name="title" placeholder="请输入评测标题" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="content">评测内容</label>
+                        <textarea id="content" name="content" placeholder="请输入评测内容，分享你的游戏体验..." required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-primary">提交评测</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- 页脚 -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <h3>关于我们</h3>
+                    <ul>
+                        <li><a href="#">网站简介</a></li>
+                        <li><a href="#">联系方式</a></li>
+                        <li><a href="#">加入我们</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>游戏分类</h3>
+                    <ul>
+                        <li><a href="#">动作冒险</a></li>
+                        <li><a href="#">角色扮演</a></li>
+                        <li><a href="#">射击游戏</a></li>
+                        <li><a href="#">策略游戏</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>平台</h3>
+                    <ul>
+                        <li><a href="#">PC</a></li>
+                        <li><a href="#">PlayStation</a></li>
+                        <li><a href="#">Xbox</a></li>
+                        <li><a href="#">Switch</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>关注我们</h3>
+                    <ul>
+                        <li><a href="#">微博</a></li>
+                        <li><a href="#">微信</a></li>
+                        <li><a href="#">B站</a></li>
+                        <li><a href="#">知乎</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 GameReview 游戏测评网. 保留所有权利.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="/js/script.js"></script>
+</body>
+</html>

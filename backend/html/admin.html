@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>游戏管理</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .admin-container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .game-list {
+            margin-top: 30px;
+        }
+        .game-item {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .game-item:hover {
+            background: #f5f5f5;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        .modal-content {
+            background-color: #fff;
+            margin: 15% auto;
+            padding: 20px;
+            border-radius: 8px;
+            width: 80%;
+            max-width: 600px;
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close:hover {
+            color: black;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container nav-container">
+            <a href="index.html" class="logo">GameReview</a>
+            <nav>
+                <ul>
+                    <li><a href="index.html">首页</a></li>
+                    <li><a href="games.html">游戏库</a></li>
+                    <li><a href="ranking.html">排行榜</a></li>
+                    <li><a href="admin.html">管理</a></li>
+                </ul>
+            </nav>
+            <div class="user-info" id="user-info" style="display: none;">
+                <span id="username"></span>
+                <button id="logout-btn" class="btn btn-secondary">退出</button>
+            </div>
+        </div>
+    </header>
+    
+    <script>
+        // 检查用户登录状态
+        function checkLoginStatus() {
+            const user = localStorage.getItem('user');
+            const token = localStorage.getItem('token');
+            
+            if (user && token) {
+                const userObj = JSON.parse(user);
+                document.getElementById('username').textContent = userObj.username;
+                document.getElementById('user-info').style.display = 'flex';
+            }
+        }
+        
+        // 退出登录
+        document.getElementById('logout-btn')?.addEventListener('click', function() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = 'index.html';
+        });
+        
+        // 页面加载时检查登录状态
+        checkLoginStatus();
+    </script>
+
+    <div class="admin-container">
+        <h2>管理中心</h2>
+        
+        <!-- 标签页 -->
+        <div class="admin-tabs">
+            <button class="tab-btn active" onclick="switchTab('games')">游戏管理</button>
+            <button class="tab-btn" onclick="switchTab('reviews')">评论管理</button>
+        </div>
+
+        <!-- 游戏管理标签页 -->
+        <div id="games-tab" class="tab-content active">
+            <!-- 创建游戏表单 -->
+            <div class="form-section">
+                <h3>创建新游戏</h3>
+                <form id="createGameForm">
+                    <div class="form-group">
+                        <label for="name">游戏名称</label>
+                        <input type="text" id="name" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="publisher">发行商</label>
+                        <input type="text" id="publisher" name="publisher" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="release_date">发行日期</label>
+                        <input type="date" id="release_date" name="release_date" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="platforms">平台</label>
+                        <input type="text" id="platforms" name="platforms" placeholder="逗号分隔，如：PC, PlayStation">
+                    </div>
+                    <div class="form-group">
+                        <label for="genres">游戏类型</label>
+                        <input type="text" id="genres" name="genres" placeholder="逗号分隔，如：动作, 冒险">
+                    </div>
+                    <div class="form-group">
+                        <label for="description">游戏描述</label>
+                        <textarea id="description" name="description" rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="cover_image">封面图片URL</label>
+                        <input type="text" id="cover_image" name="cover_image">
+                    </div>
+                    <div class="form-group">
+                        <label for="image_upload">上传图片</label>
+                        <input type="file" id="image_upload" name="image_upload" accept="image/*">
+                        <p id="upload_status"></p>
+                    </div>
+                    <button type="submit" class="btn btn-primary">创建游戏</button>
+                </form>
+            </div>
+
+            <!-- 游戏列表 -->
+            <div class="game-list">
+                <h3>游戏列表</h3>
+                <div id="gameList"></div>
+            </div>
+        </div>
+
+        <!-- 评论管理标签页 -->
+        <div id="reviews-tab" class="tab-content">
+            <!-- 创建评论表单 -->
+            <div class="form-section">
+                <h3>创建新评论</h3>
+                <form id="createReviewForm">
+                    <div class="form-group">
+                        <label for="review-game">选择游戏</label>
+                        <select id="review-game" name="game_id" required></select>
+                    </div>
+                    <div class="form-group">
+                        <label for="review-username">用户名</label>
+                        <input type="text" id="review-username" name="username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="review-rating">评分</label>
+                        <select id="review-rating" name="rating" required>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="review-title">标题</label>
+                        <input type="text" id="review-title" name="title" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="review-content">内容</label>
+                        <textarea id="review-content" name="content" rows="3" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">创建评论</button>
+                </form>
+            </div>
+
+            <!-- 评论列表 -->
+            <div class="game-list">
+                <h3>评论列表</h3>
+                <div id="reviewList"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 编辑游戏模态框 -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h3>编辑游戏</h3>
+            <form id="editGameForm">
+                <input type="hidden" id="editGameId">
+                <div class="form-group">
+                    <label for="editName">游戏名称</label>
+                    <input type="text" id="editName" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="editPublisher">发行商</label>
+                    <input type="text" id="editPublisher" name="publisher" required>
+                </div>
+                <div class="form-group">
+                    <label for="editReleaseDate">发行日期</label>
+                    <input type="date" id="editReleaseDate" name="release_date" required>
+                </div>
+                <div class="form-group">
+                    <label for="editPlatforms">平台</label>
+                    <input type="text" id="editPlatforms" name="platforms" placeholder="逗号分隔，如：PC, PlayStation">
+                </div>
+                <div class="form-group">
+                    <label for="editGenres">游戏类型</label>
+                    <input type="text" id="editGenres" name="genres" placeholder="逗号分隔，如：动作, 冒险">
+                </div>
+                <div class="form-group">
+                    <label for="editDescription">游戏描述</label>
+                    <textarea id="editDescription" name="description" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="editCoverImage">封面图片URL</label>
+                    <input type="text" id="editCoverImage" name="cover_image">
+                </div>
+                <div class="form-group">
+                    <label for="edit_image_upload">上传图片</label>
+                    <input type="file" id="edit_image_upload" name="edit_image_upload" accept="image/*">
+                    <p id="edit_upload_status"></p>
+                </div>
+                <button type="submit" class="btn btn-primary">更新游戏</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 编辑评论模态框 -->
+    <div id="editReviewModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h3>编辑评论</h3>
+            <form id="editReviewForm">
+                <input type="hidden" id="editReviewId">
+                <div class="form-group">
+                    <label for="editReviewGame">选择游戏</label>
+                    <select id="editReviewGame" name="game_id" required></select>
+                </div>
+                <div class="form-group">
+                    <label for="editReviewUsername">用户名</label>
+                    <input type="text" id="editReviewUsername" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="editReviewRating">评分</label>
+                    <select id="editReviewRating" name="rating" required>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="editReviewTitle">标题</label>
+                    <input type="text" id="editReviewTitle" name="title" required>
+                </div>
+                <div class="form-group">
+                    <label for="editReviewContent">内容</label>
+                    <textarea id="editReviewContent" name="content" rows="3" required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">更新评论</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // 检查管理员权限
+        async function checkAdmin() {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = 'login.html';
+                return false;
+            }
+            
+            try {
+                const response = await fetch('/api/auth/me', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (!response.ok) {
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('user');
+                    window.location.href = 'login.html';
+                    return false;
+                }
+                
+                const data = await response.json();
+                if (data.user.role !== 'admin') {
+                    alert('您没有管理员权限');
+                    window.location.href = 'index.html';
+                    return false;
+                }
+                
+                return true;
+            } catch (error) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                window.location.href = 'login.html';
+                return false;
+            }
+        }
+
+        // 标签页切换
+        function switchTab(tabName) {
+            // 隐藏所有标签内容
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // 移除所有标签按钮的活跃状态
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // 显示选中的标签内容
+            document.getElementById(`${tabName}-tab`).classList.add('active');
+            
+            // 激活选中的标签按钮
+            event.currentTarget.classList.add('active');
+            
+            // 加载对应的数据
+            if (tabName === 'games') {
+                loadGames();
+            } else if (tabName === 'reviews') {
+                loadReviews();
+                loadGamesForReview();
+            }
+        }
+
+        // 页面加载时获取游戏列表
+        async function loadGames() {
+            if (!await checkAdmin()) return;
+            
+            try {
+                const response = await fetch('/api/games');
+                const games = await response.json();
+                const gameList = document.getElementById('gameList');
+                gameList.innerHTML = '';
+                
+                games.forEach(game => {
+                    const gameItem = document.createElement('div');
+                    gameItem.className = 'game-item';
+                    gameItem.innerHTML = `
+                        <div>
+                            <h4>${game.name}</h4>
+                            <p>${game.publisher} | ${new Date(game.release_date).toISOString().split('T')[0]}</p>
+                        </div>
+                        <div class="action-buttons">
+                            <button class="btn btn-secondary" onclick="editGame('${game._id}')">编辑</button>
+                            <button class="btn btn-secondary" onclick="deleteGame('${game._id}')">删除</button>
+                        </div>
+                    `;
+                    gameList.appendChild(gameItem);
+                });
+            } catch (error) {
+                console.error('加载游戏失败:', error);
+            }
+        }
+
+        // 加载游戏列表到评论表单
+        async function loadGamesForReview() {
+            if (!await checkAdmin()) return;
+            
+            try {
+                const response = await fetch('/api/games');
+                const games = await response.json();
+                const gameSelect = document.getElementById('review-game');
+                
+                // 清空现有选项
+                gameSelect.innerHTML = '';
+                
+                // 添加默认选项
+                const defaultOption = document.createElement('option');
+                defaultOption.value = '';
+                defaultOption.textContent = '请选择游戏';
+                gameSelect.appendChild(defaultOption);
+                
+                // 添加游戏选项
+                games.forEach(game => {
+                    const option = document.createElement('option');
+                    option.value = game._id;
+                    option.textContent = game.name;
+                    gameSelect.appendChild(option);
+                });
+            } catch (error) {
+                console.error('加载游戏列表失败:', error);
+            }
+        }
+
+        // 加载评论列表
+        async function loadReviews() {
+            if (!await checkAdmin()) return;
+            
+            try {
+                const response = await fetch('/api/reviews');
+                const reviews = await response.json();
+                const reviewList = document.getElementById('reviewList');
+                reviewList.innerHTML = '';
+                
+                reviews.forEach(review => {
+                    const reviewItem = document.createElement('div');
+                    reviewItem.className = 'game-item';
+                    reviewItem.innerHTML = `
+                        <div>
+                            <h4>${review.title}</h4>
+                            <p>游戏: ${review.game_id.name || '未知游戏'} | 用户: ${review.username} | 评分: ${review.rating}</p>
+                            <p>${review.content.substring(0, 100)}${review.content.length > 100 ? '...' : ''}</p>
+                        </div>
+                        <div class="action-buttons">
+                            <button class="btn btn-secondary" onclick="editReview('${review._id}')">编辑</button>
+                            <button class="btn btn-secondary" onclick="deleteReview('${review._id}')">删除</button>
+                        </div>
+                    `;
+                    reviewList.appendChild(reviewItem);
+                });
+            } catch (error) {
+                console.error('加载评论失败:', error);
+            }
+        }
+
+        // 文件上传功能
+        document.getElementById('image_upload').addEventListener('change', async function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            const formData = new FormData();
+            formData.append('image', file);
+            
+            try {
+                const response = await fetch('/api/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+                document.getElementById('cover_image').value = data.path;
+                document.getElementById('upload_status').textContent = '图片上传成功';
+            } catch (error) {
+                console.error('上传失败:', error);
+                document.getElementById('upload_status').textContent = '上传失败';
+            }
+        });
+
+        // 编辑模态框文件上传功能
+        document.getElementById('edit_image_upload').addEventListener('change', async function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            const formData = new FormData();
+            formData.append('image', file);
+            
+            try {
+                const response = await fetch('/api/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+                document.getElementById('editCoverImage').value = data.path;
+                document.getElementById('edit_upload_status').textContent = '图片上传成功';
+            } catch (error) {
+                console.error('上传失败:', error);
+                document.getElementById('edit_upload_status').textContent = '上传失败';
+            }
+        });
+
+        // 创建游戏
+        document.getElementById('createGameForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            if (!await checkAdmin()) return;
+            
+            const formData = {
+                name: this.name.value,
+                publisher: this.publisher.value,
+                release_date: this.release_date.value,
+                platforms: this.platforms.value.split(',').map(p => p.trim()),
+                genres: this.genres.value.split(',').map(g => g.trim()),
+                description: this.description.value,
+                cover_image: this.cover_image.value
+            };
+
+            try {
+                const response = await fetch('/api/games', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+                await response.json();
+                alert('游戏创建成功');
+                this.reset();
+                document.getElementById('upload_status').textContent = '';
+                loadGames();
+            } catch (error) {
+                console.error('创建游戏失败:', error);
+                alert('创建游戏失败');
+            }
+        });
+
+        // 创建评论
+        document.getElementById('createReviewForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            if (!await checkAdmin()) return;
+            
+            const formData = {
+                game_id: this.game_id.value,
+                username: this.username.value,
+                rating: parseInt(this.rating.value),
+                title: this.title.value,
+                content: this.content.value
+            };
+
+            try {
+                const response = await fetch('/api/reviews', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+                await response.json();
+                alert('评论创建成功');
+                this.reset();
+                loadReviews();
+            } catch (error) {
+                console.error('创建评论失败:', error);
+                alert('创建评论失败');
+            }
+        });
+
+        // 删除游戏
+        async function deleteGame(gameId) {
+            if (!await checkAdmin()) return;
+            
+            if (confirm('确定要删除这个游戏吗？')) {
+                try {
+                    const response = await fetch(`/api/games/${gameId}`, {
+                        method: 'DELETE'
+                    });
+                    await response.json();
+                    alert('游戏删除成功');
+                    loadGames();
+                } catch (error) {
+                    console.error('删除游戏失败:', error);
+                    alert('删除游戏失败');
+                }
+            }
+        }
+
+        // 删除评论
+        async function deleteReview(reviewId) {
+            if (!await checkAdmin()) return;
+            
+            if (confirm('确定要删除这个评论吗？')) {
+                try {
+                    const response = await fetch(`/api/reviews/${reviewId}`, {
+                        method: 'DELETE'
+                    });
+                    await response.json();
+                    alert('评论删除成功');
+                    loadReviews();
+                } catch (error) {
+                    console.error('删除评论失败:', error);
+                    alert('删除评论失败');
+                }
+            }
+        }
+
+        // 编辑游戏
+        async function editGame(gameId) {
+            if (!await checkAdmin()) return;
+            
+            try {
+                const response = await fetch(`/api/games/${gameId}`);
+                const game = await response.json();
+                
+                // 填充表单
+                document.getElementById('editGameId').value = game._id;
+                document.getElementById('editName').value = game.name;
+                document.getElementById('editPublisher').value = game.publisher;
+                document.getElementById('editReleaseDate').value = new Date(game.release_date).toISOString().split('T')[0];
+                document.getElementById('editPlatforms').value = game.platforms.join(', ');
+                document.getElementById('editGenres').value = game.genres.join(', ');
+                document.getElementById('editDescription').value = game.description;
+                document.getElementById('editCoverImage').value = game.cover_image;
+                
+                // 显示模态框
+                document.getElementById('editModal').style.display = 'block';
+            } catch (error) {
+                console.error('加载游戏失败:', error);
+                alert('加载游戏失败');
+            }
+        }
+
+        // 编辑评论
+        async function editReview(reviewId) {
+            if (!await checkAdmin()) return;
+            
+            try {
+                // 加载游戏列表到编辑评论模态框
+                const gamesResponse = await fetch('/api/games');
+                const games = await gamesResponse.json();
+                const gameSelect = document.getElementById('editReviewGame');
+                
+                // 清空现有选项
+                gameSelect.innerHTML = '';
+                
+                // 添加游戏选项
+                games.forEach(game => {
+                    const option = document.createElement('option');
+                    option.value = game._id;
+                    option.textContent = game.name;
+                    gameSelect.appendChild(option);
+                });
+                
+                // 加载评论数据
+                const response = await fetch(`/api/reviews/${reviewId}`);
+                const review = await response.json();
+                
+                // 填充表单
+                document.getElementById('editReviewId').value = review._id;
+                document.getElementById('editReviewGame').value = review.game_id._id || review.game_id;
+                document.getElementById('editReviewUsername').value = review.username;
+                document.getElementById('editReviewRating').value = review.rating;
+                document.getElementById('editReviewTitle').value = review.title;
+                document.getElementById('editReviewContent').value = review.content;
+                
+                // 显示模态框
+                document.getElementById('editReviewModal').style.display = 'block';
+            } catch (error) {
+                console.error('加载评论失败:', error);
+                alert('加载评论失败');
+            }
+        }
+
+        // 关闭模态框
+        document.querySelector('.close').addEventListener('click', function() {
+            document.getElementById('editModal').style.display = 'none';
+            // 清空上传状态
+            document.getElementById('edit_image_upload').value = '';
+            document.getElementById('edit_upload_status').textContent = '';
+        });
+
+        // 关闭评论编辑模态框
+        document.querySelector('#editReviewModal .close').addEventListener('click', function() {
+            document.getElementById('editReviewModal').style.display = 'none';
+        });
+
+        // 点击模态框外部关闭
+        window.addEventListener('click', function(event) {
+            const modal = document.getElementById('editModal');
+            const reviewModal = document.getElementById('editReviewModal');
+            if (event.target == modal) {
+                modal.style.display = 'none';
+                // 清空上传状态
+                document.getElementById('edit_image_upload').value = '';
+                document.getElementById('edit_upload_status').textContent = '';
+            } else if (event.target == reviewModal) {
+                reviewModal.style.display = 'none';
+            }
+        });
+
+        // 更新游戏
+        document.getElementById('editGameForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            if (!await checkAdmin()) return;
+            
+            const gameId = document.getElementById('editGameId').value;
+            const formData = {
+                name: this.name.value,
+                publisher: this.publisher.value,
+                release_date: this.release_date.value,
+                platforms: this.platforms.value.split(',').map(p => p.trim()),
+                genres: this.genres.value.split(',').map(g => g.trim()),
+                description: this.description.value,
+                cover_image: this.cover_image.value
+            };
+
+            try {
+                const response = await fetch(`/api/games/${gameId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+                await response.json();
+                alert('游戏更新成功');
+                document.getElementById('editModal').style.display = 'none';
+                // 清空上传状态
+                document.getElementById('edit_image_upload').value = '';
+                document.getElementById('edit_upload_status').textContent = '';
+                loadGames();
+            } catch (error) {
+                console.error('更新游戏失败:', error);
+                alert('更新游戏失败');
+            }
+        });
+
+        // 更新评论
+        document.getElementById('editReviewForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            if (!await checkAdmin()) return;
+            
+            const reviewId = document.getElementById('editReviewId').value;
+            const formData = {
+                game_id: this.game_id.value,
+                username: this.username.value,
+                rating: parseInt(this.rating.value),
+                title: this.title.value,
+                content: this.content.value
+            };
+
+            try {
+                const response = await fetch(`/api/reviews/${reviewId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+                await response.json();
+                alert('评论更新成功');
+                document.getElementById('editReviewModal').style.display = 'none';
+                loadReviews();
+            } catch (error) {
+                console.error('更新评论失败:', error);
+                alert('更新评论失败');
+            }
+        });
+
+        // 初始加载
+        loadGames();
+        // 加载评论管理标签页的游戏列表
+        loadGamesForReview();
+        // 检查管理员权限
+        checkAdmin();
+    </script>
+</body>
+</html>
