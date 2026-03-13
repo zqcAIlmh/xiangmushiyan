@@ -58,15 +58,15 @@ const startServer = async () => {
     app.use('/api/auth', require('./routes/auth'));
 
     // 静态文件服务
-    app.use(express.static('../html'));
-    app.use('/css', express.static('../css'));
-    app.use('/js', express.static('../js'));
-    app.use('/images', express.static('../images'));
-    app.use('/fonts', express.static('../fonts'));
+    app.use(express.static('/app/html'));
+    app.use('/css', express.static('/app/css'));
+    app.use('/js', express.static('/app/js'));
+    app.use('/images', express.static('/app/images'));
+    app.use('/fonts', express.static('/app/fonts'));
 
     // 默认路由，重定向到index.html
     app.get('/', (req, res) => {
-      res.sendFile('../html/index.html', { root: __dirname });
+      res.sendFile('/app/html/index.html');
     });
 
     const PORT = process.env.PORT || 5000;
