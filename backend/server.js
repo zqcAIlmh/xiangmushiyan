@@ -57,16 +57,19 @@ const startServer = async () => {
     app.use('/api/reviews', require('./routes/reviews'));
     app.use('/api/auth', require('./routes/auth'));
 
+    // 获取项目根目录的绝对路径
+    const rootDir = path.resolve(__dirname, '..');
+    
     // 静态文件服务
-    app.use(express.static(path.join(__dirname, '../html')));
-    app.use('/css', express.static(path.join(__dirname, '../css')));
-    app.use('/js', express.static(path.join(__dirname, '../js')));
-    app.use('/images', express.static(path.join(__dirname, '../images')));
-    app.use('/fonts', express.static(path.join(__dirname, '../fonts')));
+    app.use(express.static(path.join(rootDir, 'html')));
+    app.use('/css', express.static(path.join(rootDir, 'css')));
+    app.use('/js', express.static(path.join(rootDir, 'js')));
+    app.use('/images', express.static(path.join(rootDir, 'images')));
+    app.use('/fonts', express.static(path.join(rootDir, 'fonts')));
 
     // 默认路由，重定向到index.html
     app.get('/', (req, res) => {
-      res.sendFile(path.join(__dirname, '../html', 'index.html'));
+      res.sendFile(path.join(rootDir, 'html', 'index.html'));
     });
 
     const PORT = process.env.PORT || 5000;
