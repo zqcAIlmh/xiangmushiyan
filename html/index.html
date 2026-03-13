@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>游戏测评网 - 首页</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+    <header>
+        <div class="container nav-container">
+            <a href="index.html" class="logo">GameReview</a>
+            <nav>
+                <ul>
+                    <li><a href="index.html">首页</a></li>
+                    <li><a href="games.html">游戏库</a></li>
+                    <li><a href="ranking.html">排行榜</a></li>
+                    <li id="admin-link" style="display: none;"><a href="admin.html">管理</a></li>
+                </ul>
+            </nav>
+            <div class="auth-buttons" id="auth-buttons">
+                <a href="login.html" class="btn btn-secondary">登录</a>
+                <a href="register.html" class="btn btn-primary">注册</a>
+            </div>
+            <div class="user-info" id="user-info" style="display: none;">
+                <span id="username"></span>
+                <button id="logout-btn" class="btn btn-secondary">退出</button>
+            </div>
+        </div>
+    </header>
+    
+    <script>
+        // 检查用户登录状态
+        function checkLoginStatus() {
+            const user = localStorage.getItem('user');
+            const token = localStorage.getItem('token');
+            
+            if (user && token) {
+                const userObj = JSON.parse(user);
+                document.getElementById('username').textContent = userObj.username;
+                document.getElementById('auth-buttons').style.display = 'none';
+                document.getElementById('user-info').style.display = 'flex';
+                
+                // 如果是管理员，显示管理链接
+                if (userObj.role === 'admin') {
+                    document.getElementById('admin-link').style.display = 'block';
+                }
+            }
+        }
+        
+        // 退出登录
+        document.getElementById('logout-btn')?.addEventListener('click', function() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = 'index.html';
+        });
+        
+        // 页面加载时检查登录状态
+        checkLoginStatus();
+    </script>
+
+    <!-- 搜索栏 -->
+    <div class="search-container">
+        <div class="container">
+            <form class="search-form">
+                <input type="text" class="search-input" placeholder="搜索游戏...">
+                <button type="submit" class="search-btn">搜索</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 轮播图 -->
+    <div class="container">
+        <div class="carousel">
+            <div class="carousel-item active">
+                <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=video%20game%20cover%20art%20for%20a%20popular%20game%20with%20vibrant%20colors%20and%20dynamic%20action&image_size=landscape_16_9" alt="热门游戏1">
+                <div class="carousel-caption">
+                    <h3>《赛博朋克2077》评测</h3>
+                    <p>开放世界的未来都市冒险，体验夜之城的魅力</p>
+                    <a href="game-detail.html" class="btn btn-primary">查看评测</a>
+                </div>
+            </div>
+            <div class="carousel-item">
+                <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=video%20game%20cover%20art%20for%20a%20fantasy%20RPG%20with%20dragons%20and%20magic&image_size=landscape_16_9" alt="热门游戏2">
+                <div class="carousel-caption">
+                    <h3>《艾尔登法环》评测</h3>
+                    <p>FromSoftware的开放世界杰作，挑战与探索的完美结合</p>
+                    <a href="game-detail.html" class="btn btn-primary">查看评测</a>
+                </div>
+            </div>
+            <div class="carousel-item">
+                <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=video%20game%20cover%20art%20for%20a%20racing%20game%20with%20sports%20cars%20on%20a%20track&image_size=landscape_16_9" alt="热门游戏3">
+                <div class="carousel-caption">
+                    <h3>《极限竞速：地平线5》评测</h3>
+                    <p>开放世界赛车游戏的新标杆，墨西哥的绝美风景</p>
+                    <a href="game-detail.html" class="btn btn-primary">查看评测</a>
+                </div>
+            </div>
+            <div class="carousel-controls">
+                <button class="carousel-control prev">&lt;</button>
+                <button class="carousel-control next">&gt;</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 最新评测 -->
+    <div class="container content-section">
+        <h2 class="section-title">最新评测</h2>
+        <div class="review-list">
+            <div class="review-card">
+                <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=video%20game%20screenshot%20of%20a%20sci-fi%20shooter%20game&image_size=square" alt="游戏评测">
+                <div class="review-card-content">
+                    <h3>《星空》评测：太空探索的新高度</h3>
+                    <div class="review-card-meta">
+                        <span>发布于 2026-03-01</span>
+                        <span class="review-card-score">9.2</span>
+                    </div>
+                    <p class="review-card-excerpt">Bethesda的太空史诗巨作，带来了前所未有的开放世界体验。游戏中的每一个星球都充满了探索的乐趣...</p>
+                    <a href="game-detail.html" class="review-card-read-more">阅读更多</a>
+                </div>
+            </div>
+            <div class="review-card">
+                <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=video%20game%20screenshot%20of%20a%20fantasy%20adventure%20game&image_size=square" alt="游戏评测">
+                <div class="review-card-content">
+                    <h3>《博德之门3》评测：CRPG的巅峰之作</h3>
+                    <div class="review-card-meta">
+                        <span>发布于 2026-02-28</span>
+                        <span class="review-card-score">9.5</span>
+                    </div>
+                    <p class="review-card-excerpt">Larian Studios的杰作，带来了深度的角色扮演体验和丰富的剧情选择。每一个决定都可能改变游戏的走向...</p>
+                    <a href="game-detail.html" class="review-card-read-more">阅读更多</a>
+                </div>
+            </div>
+            <div class="review-card">
+                <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=video%20game%20screenshot%20of%20a%20fighting%20game&image_size=square" alt="游戏评测">
+                <div class="review-card-content">
+                    <h3>《街霸6》评测：格斗游戏的新标杆</h3>
+                    <div class="review-card-meta">
+                        <span>发布于 2026-02-25</span>
+                        <span class="review-card-score">8.8</span>
+                    </div>
+                    <p class="review-card-excerpt">Capcom的经典格斗游戏系列最新作，带来了全新的战斗系统和角色。无论是新手还是老手都能找到乐趣...</p>
+                    <a href="game-detail.html" class="review-card-read-more">阅读更多</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 热门游戏 -->
+    <div class="container content-section">
+        <h2 class="section-title">热门游戏</h2>
+        <div class="games-list">
+            <div class="game-card">
+                <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=video%20game%20cover%20for%20a%20popular%20action%20game&image_size=square" alt="游戏封面">
+                <div class="game-card-content">
+                    <h3>塞尔达传说：王国之泪</h3>
+                    <div class="game-card-meta">
+                        <span>2023-05-12</span>
+                        <span class="game-card-score">9.8</span>
+                    </div>
+                </div>
+            </div>
+            <div class="game-card">
+                <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=video%20game%20cover%20for%20a%20popular%20FPS%20game&image_size=square" alt="游戏封面">
+                <div class="game-card-content">
+                    <h3>使命召唤：现代战争3</h3>
+                    <div class="game-card-meta">
+                        <span>2023-11-10</span>
+                        <span class="game-card-score">8.5</span>
+                    </div>
+                </div>
+            </div>
+            <div class="game-card">
+                <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=video%20game%20cover%20for%20a%20popular%20sports%20game&image_size=square" alt="游戏封面">
+                <div class="game-card-content">
+                    <h3>FIFA 24</h3>
+                    <div class="game-card-meta">
+                        <span>2023-09-29</span>
+                        <span class="game-card-score">8.7</span>
+                    </div>
+                </div>
+            </div>
+            <div class="game-card">
+                <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=video%20game%20cover%20for%20a%20popular%20strategy%20game&image_size=square" alt="游戏封面">
+                <div class="game-card-content">
+                    <h3>文明7</h3>
+                    <div class="game-card-meta">
+                        <span>2024-02-08</span>
+                        <span class="game-card-score">9.0</span>
+                    </div>
+                </div>
+            </div>
+            <div class="game-card">
+                <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=video%20game%20cover%20for%20a%20popular%20horror%20game&image_size=square" alt="游戏封面">
+                <div class="game-card-content">
+                    <h3>生化危机4重制版</h3>
+                    <div class="game-card-meta">
+                        <span>2023-03-24</span>
+                        <span class="game-card-score">9.2</span>
+                    </div>
+                </div>
+            </div>
+            <div class="game-card">
+                <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=video%20game%20cover%20for%20a%20popular%20indie%20game&image_size=square" alt="游戏封面">
+                <div class="game-card-content">
+                    <h3>星露谷物语</h3>
+                    <div class="game-card-meta">
+                        <span>2016-02-26</span>
+                        <span class="game-card-score">9.3</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 页脚 -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <h3>关于我们</h3>
+                    <ul>
+                        <li><a href="#">网站简介</a></li>
+                        <li><a href="#">联系方式</a></li>
+                        <li><a href="#">加入我们</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>游戏分类</h3>
+                    <ul>
+                        <li><a href="#">动作冒险</a></li>
+                        <li><a href="#">角色扮演</a></li>
+                        <li><a href="#">射击游戏</a></li>
+                        <li><a href="#">策略游戏</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>平台</h3>
+                    <ul>
+                        <li><a href="#">PC</a></li>
+                        <li><a href="#">PlayStation</a></li>
+                        <li><a href="#">Xbox</a></li>
+                        <li><a href="#">Switch</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>关注我们</h3>
+                    <ul>
+                        <li><a href="#">微博</a></li>
+                        <li><a href="#">微信</a></li>
+                        <li><a href="#">B站</a></li>
+                        <li><a href="#">知乎</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 GameReview 游戏测评网. 保留所有权利.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="/js/script.js"></script>
+    <script>
+        // 获取热门游戏
+        async function getPopularGames() {
+            try {
+                const response = await fetch('http://localhost:5000/api/games');
+                const games = await response.json();
+                const gamesList = document.querySelector('.games-list');
+                if (gamesList) {
+                    gamesList.innerHTML = '';
+                    
+                    games.forEach(game => {
+                        const gameCard = document.createElement('div');
+                        gameCard.className = 'game-card';
+                        gameCard.innerHTML = `
+                            <img src="${game.cover_image}" alt="${game.name}">
+                            <div class="game-card-content">
+                                <h3>${game.name}</h3>
+                                <div class="game-card-meta">
+                                    <span>${new Date(game.release_date).toISOString().split('T')[0]}</span>
+                                    <span>${game.platforms.join(', ')}</span>
+                                    <span>${game.genres.join(', ')}</span>
+                                    <span class="game-card-score">${game.average_rating.toFixed(1)}</span>
+                                </div>
+                            </div>
+                        `;
+                        gamesList.appendChild(gameCard);
+                    });
+                }
+            } catch (error) {
+                console.error('Error fetching games:', error);
+            }
+        }
+
+        // 获取最新评测
+        async function getLatestReviews() {
+            try {
+                const response = await fetch('http://localhost:5000/api/games');
+                const games = await response.json();
+                const reviewList = document.querySelector('.review-list');
+                if (reviewList) {
+                    reviewList.innerHTML = '';
+                    
+                    games.forEach(game => {
+                        const reviewCard = document.createElement('div');
+                        reviewCard.className = 'review-card';
+                        reviewCard.innerHTML = `
+                            <img src="${game.cover_image}" alt="${game.name}">
+                            <div class="review-card-content">
+                                <h3>${game.name} 评测</h3>
+                                <div class="review-card-meta">
+                                    <span>发布于 ${new Date(game.release_date).toISOString().split('T')[0]}</span>
+                                    <span class="review-card-score">${game.average_rating.toFixed(1)}</span>
+                                </div>
+                                <p class="review-card-excerpt">${game.description.substring(0, 100)}...</p>
+                                <a href="game-detail.html" class="review-card-read-more">阅读更多</a>
+                            </div>
+                        `;
+                        reviewList.appendChild(reviewCard);
+                    });
+                }
+            } catch (error) {
+                console.error('Error fetching reviews:', error);
+            }
+        }
+
+        // 页面加载时获取数据
+        window.onload = function() {
+            getPopularGames();
+            getLatestReviews();
+        };
+    </script>
+</body>
+</html>
