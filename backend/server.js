@@ -62,18 +62,38 @@ const startServer = async () => {
     console.log('Parent directory:', path.resolve(__dirname, '..'));
     console.log('Current working directory:', process.cwd());
 
-    // 静态文件服务 - 使用正确的绝对路径
-    app.use(express.static('/app/html'));
-    app.use('/css', express.static('/app/css'));
-    app.use('/js', express.static('/app/js'));
-    app.use('/images', express.static('/app/images'));
-    app.use('/fonts', express.static('/app/fonts'));
+    // 添加文件系统模块
+    const fs = require('fs');
+
+    // 检查当前目录结构
+    console.log('Checking current directory structure:');
+    try {
+      const files = fs.readdirSync('/app');
+      console.log('Files in /app:', files);
+      
+      // 检查是否有html目录
+      if (fs.existsSync('/app/html')) {
+        const htmlFiles = fs.readdirSync('/app/html');
+        console.log('Files in /app/html:', htmlFiles);
+      } else {
+        console.log('/app/html directory does not exist');
+      }
+    } catch (error) {
+      console.error('Error reading directory:', error);
+    }
+
+    // 尝试使用相对路径
+    app.use(express.static('html'));
+    app.use('/css', express.static('css'));
+    app.use('/js', express.static('js'));
+    app.use('/images', express.static('images'));
+    app.use('/fonts', express.static('fonts'));
 
     // 默认路由
     app.get('/', (req, res) => {
       console.log('Request received for /');
       try {
-        res.sendFile('/app/html/index.html');
+        res.sendFile('index.html', { root: 'html' });
       } catch (error) {
         console.error('Error sending file:', error);
         res.status(500).send('Internal Server Error');
