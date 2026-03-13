@@ -58,7 +58,8 @@ const startServer = async () => {
     app.use('/api/auth', require('./routes/auth'));
 
     // 获取项目根目录的绝对路径
-    const rootDir = path.resolve(__dirname, '..');
+    const rootDir = process.cwd();
+    console.log('Root directory:', rootDir);
     
     // 静态文件服务
     app.use(express.static(path.join(rootDir, 'html')));
